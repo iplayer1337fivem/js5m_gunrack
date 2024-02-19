@@ -63,13 +63,13 @@ RegisterServerEvent('js5m_gunrack:server:storeWeapon', function(rackIndex, weapo
             TriggerClientEvent('js5m_gunrack:client:storeWeapon', -1, rackIndex, rackSlot, weaponType, data)
         else
             TriggerClientEvent('ox_lib:notify', src, {
-                description = 'Weird, you don\'t have that weapon',
+                description = 'Mærkeligt Du mangler det våben',
                 type = 'error'
             })
         end
     else
         TriggerClientEvent('ox_lib:notify', src, {
-            description = 'No more slots of that type left',
+            description = 'Der er ikke flere pladser til den type',
             type = 'error'
         })
     end
