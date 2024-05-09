@@ -183,10 +183,10 @@ local function displayPlayerWeapons(data)
         if Config.rackableWeapons[v.name] then
             local metadata = {}
             for i=1, #v.metadata.components do
-                metadata[#metadata+1] = {label = "Ekstra", value = ox_items[v.metadata.components[i]].label}
+                metadata[#metadata+1] = {label = "Component", value = ox_items[v.metadata.components[i]].label}
             end
             metadata[#metadata+1] = {label = "Ammo", value = v.metadata.ammo}
-            metadata[#metadata+1] = {label = "Holdbarhed", value = v.metadata.durability..'%'}
+            metadata[#metadata+1] = {label = "Durability", value = v.metadata.durability..'%'}
             options[#options+1] = {
                 title = 'Store ' .. v.label,
                 onSelect = function()
@@ -199,7 +199,7 @@ local function displayPlayerWeapons(data)
 
     if #options == 0 then
         options[#options+1] = {
-            title = 'Ingen våben til skabet',
+            title = 'No weapons to store',
             disabled = true
         }
     end
@@ -214,7 +214,7 @@ local function takeRackWeapons(data)
     local rack = Racks[data.args.rack]
     local registeredMenu = {
         id = 'js5m_gunrack_takeWeaponsMenu',
-        title = 'Tag våben',
+        title = 'Take Weapons',
         options = {}
     }
     local options = {}
@@ -224,13 +224,13 @@ local function takeRackWeapons(data)
         if item.name then
             local metadata = {}
             for i=1, #item.metadata.components do
-                metadata[#metadata+1] = {label = "Ekstra", value = ox_items[item.metadata.components[i]].label}
+                metadata[#metadata+1] = {label = "Component", value = ox_items[item.metadata.components[i]].label}
             end
             metadata[#metadata+1] = {label = "Ammo", value = item.metadata.ammo}
-            metadata[#metadata+1] = {label = "Holdbarhed", value = item.metadata.durability ..'%'}
+            metadata[#metadata+1] = {label = "Durability", value = item.metadata.durability ..'%'}
             options[#options+1] = {
                 
-                title = 'Tag ' .. Config.rackableWeapons[item.name].label,
+                title = 'Take ' .. Config.rackableWeapons[item.name].label,
                 onSelect = function()
                     takeWeapon(data.args.rack, i, item.name)
                 end,
@@ -244,13 +244,13 @@ local function takeRackWeapons(data)
         if item.name then
             local metadata = {}
             for i=1, #item.metadata.components do
-                metadata[#metadata+1] = {label = "Ekstra", value = ox_items[item.metadata.components[i]].label}
+                metadata[#metadata+1] = {label = "Component", value = ox_items[item.metadata.components[i]].label}
             end
             metadata[#metadata+1] = {label = "Ammo", value = item.metadata.ammo}
-            metadata[#metadata+1] = {label = "Holdbarhed", value = item.metadata.durability ..'%'}
+            metadata[#metadata+1] = {label = "Durability", value = item.metadata.durability ..'%'}
             options[#options+1] = {
                 
-                title = 'Tag ' .. Config.rackableWeapons[item.name].label,
+                title = 'Take ' .. Config.rackableWeapons[item.name].label,
                 onSelect = function()
                     takeWeapon(data.args.rack, i, item.name)
                 end,
@@ -261,7 +261,7 @@ local function takeRackWeapons(data)
 
     if #options == 0 then
         options[#options+1] = {
-            title = 'Der er ingen  våben at tage',
+            title = 'No weapons to take',
             disabled = true
         }
     end
@@ -275,8 +275,8 @@ end
 local function destroyGunRack(data)
     local rack = data.args.rack
     local confirm = lib.alertDialog({
-        header = 'Fjern våbenskab?',
-        content = 'Er du sikker på du vil fjerne skabet, du mister alt indholdet.',
+        header = 'Destroy the gun rack?',
+        content = 'Are you sure that you want to destroy this build? You will lose all the contents.',
         centered = true,
         cancel = true
     })
@@ -296,7 +296,7 @@ local function spawnGunRack(id)
     exports["qb-target"]:AddTargetEntity({rack.object}, {
         options = {
             {
-                label = 'Gem våben',
+                label = 'Store Weapon',
                 name = 'gunrack:storeWeapon',
                 icon = 'fa-solid fa-hand-holding',
                 distance = 1.5,
@@ -305,7 +305,7 @@ local function spawnGunRack(id)
                 end,
             },
             {
-                label = 'Tag våben',
+                label = 'Take Weapon',
                 name = 'gunrack:takeWeapon',
                 icon = 'fa-solid fa-hand-fist',
                 distance = 1.5,
@@ -314,7 +314,7 @@ local function spawnGunRack(id)
                 end,
             },
             {
-                label = 'Fjern våbenskab',
+                label = 'Destroy Gun Rack',
                 name = 'gunrack:destroyGunRack',
                 icon = 'fa-solid fa-trash-can',
                 distance = 1.5,
@@ -400,9 +400,9 @@ exports('placeGunRack', function()
     end
 
     lib.showTextUI(
-        '**[Q/E]**   -   Rotér  \n' ..
-        '**[ENTER]**   -   Placér våbenskab  \n' ..
-        '**[X]**   -   Fortryd  \n'
+        '**[Q/E]**   -   Rotate  \n' ..
+        '**[ENTER]**   -   Place gun rack  \n' ..
+        '**[X]**   -   Abandon  \n'
     )
 
     CreateThread(function()
@@ -458,7 +458,7 @@ exports('placeGunRack', function()
                 TaskStartScenarioInPlace(cache.ped, "WORLD_HUMAN_HAMMERING", 0, true)
                 if lib.progressBar({
                     duration = 10000,
-                    label = 'Bygger våbenskab',
+                    label = 'Building Gun Rack',
                     useWhileDead = false,
                     canCancel = true,
                     disable = {

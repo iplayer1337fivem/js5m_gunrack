@@ -23,7 +23,7 @@ local function inDistanceOfGunRack(id, src)
     return false
 end
 
-RegisterServerEvent('js5m_gunrack:server:placeGunRack', function(coords, rot)
+RegisterServerEvent('js5m_gunrack:server:placeGunRack', function(coords, rot, code)
     local src = source
     local ped = GetPlayerPed(src)
     local sourceCoords = GetEntityCoords(ped)
@@ -34,6 +34,7 @@ RegisterServerEvent('js5m_gunrack:server:placeGunRack', function(coords, rot)
             coords = {x = coords.x, y = coords.y, z = coords.z, w = rot},
             rifles = {},
             pistols = {},
+            code = code,
             taser = false,
         }
         local insertedId = db.createGunRack(rackData)
@@ -45,6 +46,8 @@ end)
 RegisterServerEvent('js5m_gunrack:server:storeWeapon', function(rackIndex, weaponSlot, weaponName)
     local src = source
     if not inDistanceOfGunRack(rackIndex, src) then return end
+    while Racks[rackIndex].busy do Wait(10) end
+    Racks[rackIndex].busy = true
     if not Config.rackableWeapons[weaponName] then return end
     local weaponType = Config.rackableWeapons[weaponName].weaponType
     local rackSlot = getWeaponSlot(rackIndex, weaponName)
@@ -63,29 +66,39 @@ RegisterServerEvent('js5m_gunrack:server:storeWeapon', function(rackIndex, weapo
             TriggerClientEvent('js5m_gunrack:client:storeWeapon', -1, rackIndex, rackSlot, weaponType, data)
         else
             TriggerClientEvent('ox_lib:notify', src, {
-                description = 'Mærkeligt Du mangler det våben',
+                description = 'Weird, you don\'t have that weapon',
                 type = 'error'
             })
         end
     else
         TriggerClientEvent('ox_lib:notify', src, {
-            description = 'Der er ikke flere pladser til den type',
+            description = 'No more slots of that type left',
             type = 'error'
         })
     end
+    Racks[rackIndex].busy = false
 end)
 
 RegisterServerEvent('js5m_gunrack:server:takeWeapon', function(rackIndex, rackSlot, weaponName)
     local src = source
     if not inDistanceOfGunRack(rackIndex, src) then return end
+    while Racks[rackIndex].busy do Wait(10) end
+    Racks[rackIndex].busy = true
     local weaponType = Config.rackableWeapons[weaponName].weaponType
-    if ox_inventory:AddItem(src, weaponName, 1, Racks[rackIndex][weaponType][rackSlot].metadata) then
-        local rackInfo = Racks[rackIndex]
-        rackInfo[weaponType][rackSlot] = {name = nil, available = true}
-        db.saveGunRack(rackIndex, rackInfo, weaponType)
-        TriggerClientEvent('js5m_gunrack:client:takeWeapon', -1, rackIndex, rackSlot, weaponType)
+    if Racks[rackIndex][weaponType][rackSlot].name == weaponName then
+        if ox_inventory:AddItem(src, weaponName, 1, Racks[rackIndex][weaponType][rackSlot].metadata) then
+            local rackInfo = Racks[rackIndex]
+            rackInfo[weaponType][rackSlot] = {name = nil, available = true}
+            db.saveGunRack(rackIndex, rackInfo, weaponType)
+            TriggerClientEvent('js5m_gunrack:client:takeWeapon', -1, rackIndex, rackSlot, weaponType)
+        end
     else
+        TriggerClientEvent('ox_lib:notify', src, {
+            description = 'That weapon does not seem to be in this rack',
+            type = 'error'
+        })
     end
+    Racks[rackIndex].busy = false
 end)
 
 RegisterServerEvent('js5m_gunrack:server:destroyGunRack', function(rackIndex)
